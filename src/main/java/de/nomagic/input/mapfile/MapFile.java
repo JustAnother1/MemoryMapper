@@ -12,6 +12,7 @@ import de.nomagic.input.mapfile.parser.SectionParser;
 public class MapFile
 {
     private final boolean valid;
+    private final LinkerDotParser linkerdot;
 
     public MapFile(Reader in) throws IOException
     {
@@ -28,18 +29,30 @@ public class MapFile
         }
         if(curSection instanceof LinkerDotParser)
         {
+            linkerdot = (LinkerDotParser) curSection;
             valid = true;
         }
         else
         {
             System.err.println("Missing last section!");
             valid = false;
+            linkerdot = null;
         }
     }
 
     public boolean isValid()
     {
         return valid;
+    }
+
+    public String[] getSectionNames()
+    {
+        return linkerdot.getSectionNames();
+    }
+
+    public int getSizeOfSection(String sectionName)
+    {
+        return linkerdot.getSizeOfSection(sectionName);
     }
 
 }

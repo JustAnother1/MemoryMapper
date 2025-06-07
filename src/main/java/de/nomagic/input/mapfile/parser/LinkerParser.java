@@ -30,9 +30,12 @@ public class LinkerParser extends ParserBase implements SectionParser
                 // -> ignore for now
                 return this;
             }
-            else if('.' == line.charAt(0))
+            else if(('.' == line.charAt(0)) || ('*'  == line.charAt(0)))
             {
-                return fac.getParserFor(Section.LINKER_DOT);
+                // this is already the first line of the next section.
+                // -> let them parse it
+                SectionParser res = fac.getParserFor(Section.LINKER_DOT);
+                return res.parse(line);
             }
             else
             {
