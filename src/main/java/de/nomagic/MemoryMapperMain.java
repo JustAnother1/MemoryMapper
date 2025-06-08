@@ -11,7 +11,6 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter2;
-import de.nomagic.cfg.McuConfig;
 import de.nomagic.input.mapfile.MapFile;
 import de.nomagic.reporter.Reporter;
 
@@ -96,15 +95,12 @@ public class MemoryMapperMain
     private boolean report()
     {
         Reporter rep = new Reporter(map);
-        McuConfig mcfg = new McuConfig();
-        rep.addMcuConfig(mcfg);
         if(false == rep.isValid())
         {
             return false;
         }
         rep.listSectionSizes();
-        rep.showRamUsage();
-        rep.showFlashUsage();
+        rep.showMemoryAreaUsage();
         return true;
     }
 

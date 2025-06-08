@@ -116,4 +116,9 @@ public class MemorySection
         return name;
     }
 
+    public int getAddress()
+    {
+        return startAddress;
+    }
+
 }

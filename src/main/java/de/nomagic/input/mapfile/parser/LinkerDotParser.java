@@ -5,9 +5,10 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.nomagic.input.mapfile.SectionCollection;
 import de.nomagic.memory.MemorySection;
 
-public class LinkerDotParser extends ParserBase implements SectionParser
+public class LinkerDotParser extends ParserBase implements SectionParser, SectionCollection
 {
     private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
     private MemorySection mem;
@@ -68,17 +69,33 @@ public class LinkerDotParser extends ParserBase implements SectionParser
         return this;
     }
 
+    @Override
     public String[] getSectionNames()
     {
         return sections.keySet().toArray(new String[0]);
     }
 
-    public int getSizeOfSection(String sectionName)
+    @Override
+    public long getSizeOfSection(String sectionName)
     {
         MemorySection curSec = sections.get(sectionName);
         if(null != curSec)
         {
             return curSec.getSize();
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    @Override
+    public long getSectionAddress(String sectionName)
+    {
+        MemorySection curSec = sections.get(sectionName);
+        if(null != curSec)
+        {
+            return curSec.getAddress();
         }
         else
         {

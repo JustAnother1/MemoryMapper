@@ -5,8 +5,9 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.nomagic.cfg.McuConfig;
 import de.nomagic.input.mapfile.MapFile;
+import de.nomagic.input.mapfile.MemoryAreaCollection;
+import de.nomagic.input.mapfile.SectionCollection;
 
 public class Reporter
 {
@@ -14,13 +15,14 @@ public class Reporter
 
     private boolean valid = true;
     private String[] sectionNames;
-    private MapFile map;
-    private McuConfig mcfg;
+    private SectionCollection allSections;
+    private MemoryAreaCollection allMemoryAreas;
 
     public Reporter(MapFile map)
     {
-        this.map = map;
-        sectionNames = map.getSectionNames();
+        allSections = map.getSectionCollection();
+        allMemoryAreas = map.getAllMemoryAreas();
+        sectionNames = allSections.getSectionNames();
         if(1 > sectionNames.length)
         {
             log.error("Found no section in map file !");
@@ -34,65 +36,45 @@ public class Reporter
         return valid;
     }
 
-    public void addMcuConfig(McuConfig mcfg)
-    {
-        this.mcfg = mcfg;
-    }
-
     public void listSectionSizes()
     {
         System.out.println("Section sizes:");
         for(int i = 0; i < sectionNames.length; i++)
         {
-            int size  = map.getSizeOfSection(sectionNames[i]);
+            long size  = allSections.getSizeOfSection(sectionNames[i]);
             System.out.println(String.format("%-40s : %10d", sectionNames[i], size));
         }
     }
 
-    public void showRamUsage()
+    public void showMemoryAreaUsage()
     {
-        int sum = 0;
-        System.out.println("");
-        System.out.println("RAM:");
-        System.out.println("====");
-        if(null != mcfg)
+        String[] names = allMemoryAreas.getMemoryAreaNames();
+        for(int i = 0; i < names.length; i++)
         {
-            int max = mcfg.getRamSize();
-            String[] sections = mcfg.getRamSectionNames();
-
-            for(int i = 0; i < sections.length; i++)
+            long sum = 0;
+            System.out.println("");
+            System.out.println(names[i] + ":");
+            System.out.println("=============");
+            long max = allMemoryAreas.getMemoryAreaSize(names[i]);
+            long addrMin = allMemoryAreas.getMemoryAreaAddressMin(names[i]);
+            long addrMax = addrMin + max;
+            String[] sections = allSections.getSectionNames();
+            for(int k = 0; k < sections.length; k++)
             {
-                int size  = map.getSizeOfSection(sections[i]);
-                System.out.println(String.format("%-40s : %10d (%3.2f%%)", sections[i], size, ((float)size*100)/(float)max));
-                sum = sum + size;
+                long addr = allSections.getSectionAddress(sections[k]);
+                if((addr >= addrMin) && (addr <= addrMax))
+                {
+                    long size  = allSections.getSizeOfSection(sections[k]);
+                    System.out.println(String.format("%-40s : %10d (%3.2f%%)", sections[k], size, ((float)size*100)/(float)max));
+                    sum = sum + size;
+                }
+                // else skip as not in this memory area
             }
             System.out.println(String.format("%-40s : %10s", "-----", "----------"));
             System.out.println(String.format("%-40s : %10d (%3.2f%%) (free : %d)", "total", sum, ((float)sum*100)/(float)max, max-sum));
-        }
-        System.out.println("");
-    }
 
-    public void showFlashUsage()
-    {
-        System.out.println("");
-        System.out.println("Flash:");
-        System.out.println("======");
-        int sum = 0;
-        if(null != mcfg)
-        {
-            int max = mcfg.getFlashSize();
-            String[] sections = mcfg.getFlashSectionNames();
-
-            for(int i = 0; i < sections.length; i++)
-            {
-                int size  = map.getSizeOfSection(sections[i]);
-                System.out.println(String.format("%-40s : %10d (%3.2f%%)", sections[i], size, ((float)size*100)/(float)max));
-                sum = sum + size;
-            }
-            System.out.println(String.format("%-40s : %10s", "-----", "----------"));
-            System.out.println(String.format("%-40s : %10d (%3.2f%%)", "total", sum, ((float)sum*100)/(float)max));
+            System.out.println("");
         }
-        System.out.println("");
     }
 
 }

@@ -6,17 +6,17 @@ import java.io.Reader;
 
 import de.nomagic.input.mapfile.parser.LinkerDotParser;
 import de.nomagic.input.mapfile.parser.ParserFactory;
+import de.nomagic.input.mapfile.parser.Section;
 import de.nomagic.input.mapfile.parser.StartParser;
 import de.nomagic.input.mapfile.parser.SectionParser;
 
 public class MapFile
 {
     private final boolean valid;
-    private final LinkerDotParser linkerdot;
+    private final ParserFactory fac = new ParserFactory();
 
     public MapFile(Reader in) throws IOException
     {
-        ParserFactory fac = new ParserFactory();
         SectionParser curSection = new StartParser(fac);
         BufferedReader reader = new BufferedReader(in);
         // read line by line
@@ -29,14 +29,12 @@ public class MapFile
         }
         if(curSection instanceof LinkerDotParser)
         {
-            linkerdot = (LinkerDotParser) curSection;
             valid = true;
         }
         else
         {
             System.err.println("Missing last section!");
             valid = false;
-            linkerdot = null;
         }
     }
 
@@ -45,14 +43,14 @@ public class MapFile
         return valid;
     }
 
-    public String[] getSectionNames()
+    public SectionCollection getSectionCollection()
     {
-        return linkerdot.getSectionNames();
+        return (SectionCollection)fac.getParserFor(Section.LINKER_DOT);
     }
 
-    public int getSizeOfSection(String sectionName)
+    public MemoryAreaCollection getAllMemoryAreas()
     {
-        return linkerdot.getSizeOfSection(sectionName);
+        return (MemoryAreaCollection)fac.getParserFor(Section.MEMORY_CONFIG);
     }
 
 }
