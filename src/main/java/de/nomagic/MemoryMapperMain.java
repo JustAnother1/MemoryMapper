@@ -101,6 +101,8 @@ public class MemoryMapperMain
         }
         rep.listSectionSizes();
         rep.showMemoryAreaUsage();
+        //rep.showBiggestElements();
+        rep.showBiggestElementsFromArea("RAM");
         return true;
     }
 

@@ -1,11 +1,13 @@
 package de.nomagic.input.mapfile.parser;
 
 import java.util.HashMap;
+import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.nomagic.input.mapfile.SectionCollection;
+import de.nomagic.memory.MemoryLocation;
 import de.nomagic.memory.MemorySection;
 
 public class LinkerDotParser extends ParserBase implements SectionParser, SectionCollection
@@ -100,6 +102,19 @@ public class LinkerDotParser extends ParserBase implements SectionParser, Sectio
         else
         {
             return -1;
+        }
+    }
+
+    public Vector<MemoryLocation> getLocationsOfSection(String sectionName)
+    {
+        MemorySection curSec = sections.get(sectionName);
+        if(null != curSec)
+        {
+            return curSec.getLocations();
+        }
+        else
+        {
+            return null;
         }
     }
 

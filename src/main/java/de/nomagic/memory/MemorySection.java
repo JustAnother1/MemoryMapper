@@ -1,5 +1,7 @@
 package de.nomagic.memory;
 
+import java.util.Vector;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +14,8 @@ public class MemorySection
     private int startAddress = -1;
     private int size = -1;
     private String description = null;
+    private MemoryLocation curLocation = null;
+    private Vector<MemoryLocation> locations = new Vector<MemoryLocation>();
 
     // line is something like this ".text           0x10000000      0x200" or this ".third_stage_boot"
     public MemorySection(String line)
@@ -96,8 +100,53 @@ public class MemorySection
         {
             return;
         }
-        String[] parts = line.split(" ");
-        addParts(parts);
+        if(true == line.startsWith(" ."))
+        {
+            // start of new memory location
+            curLocation = new MemoryLocation(line);
+            locations.add(curLocation);
+        }
+        else if(true == line.startsWith(" *"))  // *fill* or heading
+        {
+            // if it has a address and size -> section -> else ignore
+            int numHex = 0;
+            String[] parts = line.split(" ");
+            for(String part : parts)
+            {
+                if(true == part.startsWith("0x"))
+                {
+                    numHex++;
+                }
+            }
+            if(1 < numHex)
+            {
+                curLocation = new MemoryLocation(line);
+                locations.add(curLocation);
+            }
+            else
+            {
+                // probably just a header like " *(.third_stage_boot .third_stage_boot.*)"
+                // -> ignore for now
+            }
+        }
+        else if(true == line.startsWith("  "))
+        {
+            // add to current memory location
+            if(null == curLocation)
+            {
+                // might belong to the section specification
+                String[] parts = line.split(" ");
+                addParts(parts);
+            }
+            else
+            {
+                curLocation.add(line);
+            }
+        }
+        else
+        {
+            log.error("Expected line in memory secions ({})!", line);
+        }
     }
 
     public int getSize()
@@ -111,7 +160,7 @@ public class MemorySection
         return size;
     }
 
-    public Object getName()
+    public String getName()
     {
         return name;
     }
@@ -119,6 +168,11 @@ public class MemorySection
     public int getAddress()
     {
         return startAddress;
+    }
+
+    public Vector<MemoryLocation> getLocations()
+    {
+        return locations;
     }
 
 }
