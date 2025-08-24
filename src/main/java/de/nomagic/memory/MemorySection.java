@@ -145,7 +145,7 @@ public class MemorySection
         }
         else
         {
-            log.error("Expected line in memory secions ({})!", line);
+            log.error("Unexpected line in memory secions ({})!", line);
         }
     }
 
