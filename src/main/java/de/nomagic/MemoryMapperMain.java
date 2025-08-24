@@ -17,6 +17,7 @@ import de.nomagic.reporter.Reporter;
 public class MemoryMapperMain
 {
     private MapFile map;
+    private String mapFileName;
 
     public MemoryMapperMain()
     {
@@ -78,16 +79,61 @@ public class MemoryMapperMain
         StatusPrinter2 sp = new StatusPrinter2();
         sp.printInCaseOfErrorsOrWarnings(context);
     }
+    private void printHelpText()
+    {
+        System.err.println("Parameters:");
+        System.err.println("===========");
+        System.err.println("-h");
+        System.err.println("     : This text");
+        System.err.println("-v");
+        System.err.println("     : increase logging");
+        System.err.println("-map mapfile.map");
+        System.err.println("     : define the file to read");
+    }
 
     private boolean parseCommandLineParameters(String[] args)
     {
-        // TODO
-        return true;
+        boolean res = false;
+        for(int i = 0; i < args.length; i++)
+        {
+            if(true == args[i].startsWith("-"))
+            {
+                if(true == "-map".equals(args[i]))
+                {
+                    i++;
+                    mapFileName = args[i];
+                    res = true;
+                }
+                else if(true == "-v".equals(args[i]))
+                {
+                    // already handled.
+                }
+// other options
+                else if(true == "-h".equals(args[i]))
+                {
+                    printHelpText();
+                    System.exit(0);
+                }
+                else
+                {
+                    System.err.println("Invalid Parameter : " + args[i]);
+                    printHelpText();
+                    System.exit(2);
+                }
+            }
+            else
+            {
+                System.err.println("Invalid Parameter : " + args[i]);
+                printHelpText();
+                System.exit(1);
+            }
+        }
+        return res;
     }
 
     private boolean readAndParse() throws IOException
     {
-        FileReader fin = new FileReader("input/rp2040_nomagic_probe.map");
+        FileReader fin = new FileReader(mapFileName);
         map = new MapFile(fin);
         return map.isValid();
     }
@@ -133,6 +179,7 @@ public class MemoryMapperMain
         }
         else
         {
+            m.printHelpText();
             System.exit(1);
         }
     }
